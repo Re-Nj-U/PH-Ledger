@@ -1,23 +1,21 @@
-# PIKU Holidays Ledger — complete source
+# PIKU Holidays Ledger — main project
 
-Updated 16 October 2026. This folder is the complete application, including the dark green theme, Supabase migration, missing-route fixes and repaired npm lockfile.
+Updated 17 October 2026. Use **/Users/pikachu/Documents/ChatGPT/PH-Ledger** as the main working folder. This is the folder connected to GitHub repository Re-Nj-U/PH-Ledger. Earlier ZIPs and the PIKU-Holidays-Ledger folder are separate copies; changes there do not update this repository.
 
-Use **PIKU-Holidays-Ledger-LATEST.zip** for a fresh local folder or GitHub upload. Earlier files named `Fix.zip` were partial updates; they are not complete applications. Do not combine old partial downloads when starting over.
+## Run and check this folder
 
-## Run locally
+1. Open PH-Ledger in VS Code. Check that package.json is directly inside the folder.
+2. Use Node.js **24.x**. If nvm is installed, run `nvm install` followed by `nvm use` in this folder.
+3. Run `npm ci` to install the exact locked dependencies.
+4. Run `npm run verify`. It runs the tests, source/lockfile check, production build and TypeScript check in order. It does not connect to your real database.
+5. For local sign-in, copy `.env.example` to `.env.local` and fill in the four required values privately. Vercel settings do not automatically appear on your computer. Never upload this file or financial backups to GitHub.
+6. Run `npm run deployment:check` to check your configured Supabase connection, private tables and disabled public signup. If the server certificate needs Supabase's CA, follow the certificate instructions in docs/VERCEL-GO-LIVE.md. Do not disable certificate verification.
+7. Run `npm run dev` and open the Local URL printed in Terminal.
 
-1. Extract this ZIP into a new folder. Open the inner `piku-holidays-ledger` folder; `package.json` must be directly inside it.
-2. Use Node.js **24.x**. If you already use nvm, run `nvm install` and `nvm use` here; `.nvmrc` selects version 24.
-3. Run `npm ci`.
-4. Copy `.env.example` to `.env.local` and enter the four values privately. Vercel environment variables are not automatically available locally. Do not upload `.env.local` or your ledger backup to GitHub.
-5. Run `npm run dev` and open the Local URL printed in your terminal. Port 3000 is usual; if it is occupied, use the actual port printed by Next.js.
+## Deploy through your existing repository
 
-## Update Vercel
+Commit and push source changes from **PH-Ledger** to the existing GitHub repository. Keep package.json and package-lock.json together. Keep all hidden configuration files tracked, including .gitignore, .vercelignore, .npmrc, .nvmrc and .env.example.
 
-Upload the contents of this complete source folder into the existing private GitHub repository, preserving folder paths and replacing matching source files. Keep `package.json` at the repository root. GitHub's browser uploader accepts up to 100 files at a time: upload `components/` first, commit, then upload all remaining files and folders. Show hidden files on macOS using Command+Shift+Period so `.npmrc`, `.nvmrc`, `.gitignore`, `.vercelignore` and `.env.example` are included.
+In Vercel use **Next.js**, root directory **./**, **Node 24.x**, install command **npm ci**, and build command **npm run build**. The prebuild step checks required files, local imports and the complete dependency lockfile. Keep the four required Production variables from `.env.example`; add the optional server-only DATABASE_SSL_CA if your connection needs it. Deploy the latest pushed commit.
 
-Use Next.js, Node 24.x, `npm ci` and `npm run build` in Vercel. Keep the four Production environment variables already configured. Redeploy the updated commit with the previous build cache disabled for this repair.
-
-The npm install failure `Invalid Version:` was reproduced from the older archive. Two optional dependency records in `package-lock.json` had no version. The lockfile was repaired without changing application dependency versions. Always upload `package.json` and `package-lock.json` together.
-
-After deployment succeeds, follow `docs/VERCEL-GO-LIVE.md` to verify login and import your existing backup. `docs/SECURITY-REVIEW.md` records the scoped security review and its outstanding checks; this release is not a full ASVS compliance claim.
+The audit results and remaining live checks are in [docs/DEPLOYMENT-AUDIT.md](docs/DEPLOYMENT-AUDIT.md). Local build success is not confirmation of a successful Vercel deployment or full ASVS compliance. Follow [docs/VERCEL-GO-LIVE.md](docs/VERCEL-GO-LIVE.md) before importing real records.

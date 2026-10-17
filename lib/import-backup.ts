@@ -14,6 +14,7 @@ export function validateBackup(value: unknown) {
     const records = backup.records as Entry[];
     const ids = new Map(records.map(record => [record.id, record]));
     if (ids.size !== records.length) throw new Error('The backup contains duplicate record IDs.');
+    const settled = new Set<string>();
     for (const record of records) {
         for (const [key, kind] of [['vehicleId', 'vehicle'], ['tripId', 'trip'], ['partnerId', 'partner'], ['loanId', 'loan'], ['linkedDueId', 'due']]) {
             if (record[key] && ids.get(record[key])?.kind !== kind)
@@ -37,7 +38,9 @@ export function validateBackup(value: unknown) {
             }
             if (record.linkedDueId) {
                 const due = ids.get(record.linkedDueId)!;
-                if (!record.paid || record.amount !== due.amount || due.paidDate !== (record.paymentDate || record.date))
+                if (settled.has(due.id)) throw new Error('The backup pays the same due item more than once.');
+                settled.add(due.id);
+                if (!record.paid || record.category !== due.category || record.amount !== due.amount || due.paidDate !== (record.paymentDate || record.date))
                     throw new Error('A backup due settlement does not match its expense.');
             }
         }

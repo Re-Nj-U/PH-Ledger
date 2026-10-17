@@ -10,7 +10,7 @@ FOLDERS = ('app', 'components', 'hooks', 'lib', 'db', 'public', 'supabase', 'tes
 FILES = ('package.json', 'package-lock.json', 'next.config.ts', 'tsconfig.json',
          'postcss.config.mjs', 'eslint.config.mjs', 'drizzle.config.ts', 'README.md', 'START-HERE.md',
          '.env.example', '.gitignore', '.vercelignore', '.npmrc', '.nvmrc', 'vercel.json', 'proxy.ts',
-         'scripts/setup-database.mjs', 'scripts/check-deployment.mjs',
+         'scripts/setup-database.mjs', 'scripts/check-deployment.mjs', 'scripts/check-source.mjs',
          'scripts/import-ledger.mts', 'scripts/package-source.py')
 sources = set(FILES)
 manifest = json.loads((ROOT / 'package.json').read_text())

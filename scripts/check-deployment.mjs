@@ -1,4 +1,5 @@
 import postgres from 'postgres';
+import { postgresOptions } from '../lib/postgres-options.mjs';
 import { createClient } from '@supabase/supabase-js';
 
 const required = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'DATABASE_URL', 'OWNER_EMAIL'];
@@ -10,8 +11,9 @@ if (missing.length) {
 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(process.env.OWNER_EMAIL)) {
     console.error('OWNER_EMAIL must be a valid email address.'); process.exit(1);
 }
-const sql = postgres(process.env.DATABASE_URL, { prepare: false, max: 1, ssl: 'require', connect_timeout: 10 });
+let sql;
 try {
+    sql = postgres(process.env.DATABASE_URL, postgresOptions());
     const rows = await sql`SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname='ledger'`;
     for (const name of ['business', 'members', 'records', 'audit'])
         if (!rows.some(row => row.tablename === name && row.rowsecurity)) throw new Error('schema');
@@ -29,7 +31,9 @@ try {
         process.exitCode = 1;
     } else console.log('Database schema, private-table access and Supabase Auth configuration checks passed.');
     console.log('Next: verify owner/partner sign-in and migrated balances in the deployed application.');
-} catch {
+} catch (error) {
+    if (['SELF_SIGNED_CERT_IN_CHAIN', 'DEPTH_ZERO_SELF_SIGNED_CERT', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY', 'CERT_HAS_EXPIRED', 'ERR_TLS_CERT_ALTNAME_INVALID'].includes(error.code))
+        console.error('Database TLS certificate verification failed. Check the pooler host and Supabase CA certificate; set server-only DATABASE_SSL_CA when required.');
     console.error('Deployment check failed. Verify the Supabase URL, publishable key, pooler URI and schema.sql setup. Credentials were not printed.');
     process.exitCode = 1;
-} finally { await sql.end(); }
+} finally { await sql?.end(); }

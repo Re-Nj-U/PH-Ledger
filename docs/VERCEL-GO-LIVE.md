@@ -1,6 +1,6 @@
 # PIKU Holidays Vercel go live guide
 
-Prepared 10 October 2026. Owner email: **pikuholidays@gmail.com**.
+Updated 17 October 2026. Owner email: **pikuholidays@gmail.com**.
 
 The source is now prepared for **Next.js on Vercel + Supabase PostgreSQL + Supabase Auth**. The existing Sites website remains available. A local build is not a live deployment: the steps below connect your accounts, create the database, configure login and publish the new application.
 
@@ -43,17 +43,19 @@ Open the Supabase project's **Connect** dialog and API key settings.
 
 Copy the actual pooler host from Supabase rather than guessing the region or hostname. If your password contains URI special characters, percent encode the password portion of the connection URI. Keep the full DATABASE_URL private. The app disables prepared statements and uses a small, SSL-protected connection pool for this connection mode.
 
+TLS certificate verification is enabled for the application and all database tools. If `npm run deployment:check` fails with a certificate trust problem, download your project's CA certificate from **Supabase → Database Settings → SSL Configuration**. Set **DATABASE_SSL_CA** (server only) to the PEM certificate in `.env.local` and Vercel. Literal `\n` sequences between certificate lines are supported. Redeploy after changing Vercel variables and rerun the check. Do not use `rejectUnauthorized: false` or disable TLS to bypass an error. An optional CA placeholder is in `.env.example`. See [Supabase's certificate instructions](https://supabase.com/docs/guides/platform/ssl-enforcement).
+
 No Supabase secret/service-role API key is needed by this application. Browser code uses the publishable key for Auth; financial tables are accessed by the server over Postgres, never directly by the browser.
 
 ## 4 Publish the prepared source
 
 ### Option A Vercel dashboard with GitHub
 
-This is the convenient option for automatic deployments after future updates.
+The existing main folder is **/Users/pikachu/Documents/ChatGPT/PH-Ledger**, connected to **Re-Nj-U/PH-Ledger**. Continue committing and pushing from that folder; do not re-extract an older ZIP over it. Your existing Vercel project can deploy the latest pushed main commit. The steps below also describe initial setup for a new project.
 
 1. Create a **private GitHub repository** for the Vercel version, for example `piku-holidays-ledger`.
 2. Upload the prepared project source or extracted source ZIP. Upload the files and folders inside the ZIP, not the ZIP file itself. `package.json` must be at the repository root.
-3. Include `app/`, `components/`, `hooks/`, `lib/`, `db/`, `public/`, `supabase/`, `tests/`, the three new setup scripts, configuration files, `package.json` and `package-lock.json`.
+3. Include `app/`, `components/`, `hooks/`, `lib/`, `db/`, `public/`, `supabase/`, `tests/`, the scripts/ directory, configuration files, `package.json` and `package-lock.json`.
 4. Never upload `.env.local`, financial backup JSON, `node_modules`, `.next`, `.wrangler`, `.git`, or `outputs`. The source ZIP excludes private/runtime data.
 5. Open https://vercel.com/new, import that repository, and choose **Next.js**.
 6. Use **Node.js 24.x** (pinned by the project), root directory the repository root, build command `npm run build`, and install command `npm ci`.
@@ -69,7 +71,7 @@ Use this if you prefer to publish the local project directly.
 1. Open Terminal in the project directory:
 
 ```sh
-cd /Users/pikachu/Documents/ChatGPT/PIKU-Holidays-Ledger
+cd /Users/pikachu/Documents/ChatGPT/PH-Ledger
 npx vercel login
 npx vercel
 ```
@@ -146,9 +148,7 @@ For local development, copy `.env.example` to `.env.local` and fill it in privat
 npm ci
 npm run db:setup
 npm run deployment:check
-npm test
-npm run build
-npm run typecheck
+npm run verify
 npm run dev
 ```
 

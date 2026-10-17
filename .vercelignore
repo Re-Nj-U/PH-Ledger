@@ -21,3 +21,4 @@ scripts/*
 !scripts/setup-database.mjs
 !scripts/check-deployment.mjs
 !scripts/import-ledger.mts
+!scripts/check-source.mjs

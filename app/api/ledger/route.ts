@@ -5,6 +5,7 @@ import { importLedger } from '../../../lib/import-ledger';
 import { resolveAccess } from '../../../lib/access';
 import { validateWriteRequest, readLedgerBody } from '../../../lib/request-security';
 import { entrySchema, settingsSchema, memberSchema } from '../../../lib/validation';
+import { assertRecordWriteAllowed, validateDueSettlement } from '../../../lib/record-rules';
 import { defaultSettings, tripCategories, type Entry, partnerTotals, tripTotals, advanceDue, today } from '../../../lib/ledger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -96,8 +97,7 @@ export async function POST(request: Request) {
             const old = rs.find(x => x.id === body.id);
             if (!old)
                 throw new Error('404:Record not found.');
-            if (['vehicle', 'loan', 'partner'].includes(old.kind) && !c.owner)
-                throw new Error('403:Only the owner can remove setup records.');
+            assertRecordWriteAllowed(c.owner, old, old);
             if (rs.some(x => x.tripId === old.id || x.partnerId === old.id || x.loanId === old.id || x.vehicleId === old.id || x.linkedDueId === old.id))
                 throw new Error('This record has linked transactions. Update it instead of deleting it.');
             if (old.version !== body.version)
@@ -130,10 +130,7 @@ export async function POST(request: Request) {
                 throw new Error('Record category cannot change.');
             if (old && old.version !== e.version)
                 throw new Error('409:This record changed on another device. Refresh and try again.');
-            if (['vehicle', 'loan', 'partner'].includes(e.kind) && !c.owner)
-                throw new Error('403:Only the owner can change vehicles, loans, and partner setup.');
-            if (e.opening && !c.owner)
-                throw new Error('403:Only the owner can add opening balances.');
+            assertRecordWriteAllowed(c.owner, e, old);
             if (e.date && e.date < c.settings.startDate && !e.opening)
                 throw new Error('Transaction date is before the ledger start date.');
             if (e.kind === 'due' && e.paidDate !== old?.paidDate)
@@ -182,19 +179,13 @@ export async function POST(request: Request) {
             }
             if (old && e.kind === 'loan' && effective.some(x => x.kind === 'expense' && x.loanId === e.id) && ['emi', 'total', 'firstDue', 'openingPaid'].some(k => old[k] !== e[k]))
                 throw new Error('Loan schedule cannot change after payments are recorded.');
-            if (e.kind === 'expense' && e.linkedDueId) {
-                const due = effective.find(x => x.id === e.linkedDueId && x.kind === 'due');
-                if (!due)
-                    throw new Error('Due item not found.');
-                if (due.paidDate && !old)
-                    throw new Error('409:This due item was already paid. Refresh your ledger.');
-                if (e.amount !== due.amount)
-                    throw new Error('Pay the full amount of this due item.');
-                if (e.paid === false)
-                    throw new Error('Due settlement must be marked paid.');
+            const due = validateDueSettlement(e, old, effective);
+            if (due) {
+                if (entries.some(entry => entry.id === due.id))
+                    throw new Error('Save changes to the due item separately before recording its payment.');
                 const changed = { ...due, paidDate: e.paymentDate || e.date };
                 stmts.push(c.db.prepare('UPDATE records SET data=?,version=version+1,updated_at=? WHERE id=?').bind(JSON.stringify(changed), new Date().toISOString(), due.id));
-                if (!old && due.repeat !== 'none') {
+                if (old?.linkedDueId !== due.id && due.repeat !== 'none') {
                     const next = { ...due, id: crypto.randomUUID(), dueDate: advanceDue(due.dueDate, due.repeat), paidDate: undefined, version: undefined };
                     stmts.push(c.db.prepare('INSERT INTO records(id,kind,data,version,updated_at) VALUES(?,?,?,1,?)').bind(next.id, 'due', JSON.stringify(next), new Date().toISOString()));
                 }

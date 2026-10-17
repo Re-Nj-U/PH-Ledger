@@ -34,7 +34,7 @@ The frontend, application API and login pages run on Vercel. Supabase provides P
 
 `supabase/schema.sql` creates `ledger.business`, `ledger.members`, `ledger.records` and `ledger.audit`. Financial JSON remains text so the existing record shapes can be imported without changing values. The private schema is not exposed to browser roles: schema/table privileges are revoked for public, anon and authenticated, and row-level security is enabled without browser access policies. The Vercel server connects with a private DATABASE_URL.
 
-`db/index.ts` uses Postgres.js with SSL, `prepare: false` and `max: 1` for Supabase transaction pooling. It creates a lazy, process-local client, not a new pool for each request.
+`db/index.ts` uses Postgres.js with verified TLS, `prepare: false`, `max: 1` and `max_pipeline: 1` for Supabase transaction pooling. It creates a lazy, process-local client, not a new pool for each request. Shared server-only options in lib/postgres-options.mjs also configure the setup/check/import tools. DATABASE_SSL_CA optionally supplies a PEM CA certificate.
 
 `lib/database.ts` supplies the ledger's small parameterized-statement interface. It explicitly addresses the private schema. Business input is always bound as parameters; it is never interpolated into SQL.
 
@@ -55,6 +55,7 @@ Old financial records migrate through the old site's JSON export. Login accounts
 | `vercel.json` | Next.js deployment, npm install/build and output configuration |
 | `.env.example` | Four required variables with safe placeholders and configured owner email |
 | `supabase/schema.sql` | Initial PostgreSQL schema, access restrictions and indexes |
+| `scripts/check-source.mjs` | Prebuild required-file, local-import and complete lockfile validation |
 | `scripts/setup-database.mjs` | Optional local schema setup using the private database URI |
 | `scripts/check-deployment.mjs` | Configuration/schema/private access/public-signup checks; no credential output |
 | `scripts/import-ledger.mts` | Optional validated empty-ledger CLI migration |

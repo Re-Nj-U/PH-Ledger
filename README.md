@@ -2,6 +2,8 @@
 
 A mobile-first travel business ledger prepared for **Next.js on Vercel**, **Supabase PostgreSQL**, and **Supabase email/password authentication**.
 
+Work in **/Users/pikachu/Documents/ChatGPT/PH-Ledger** (GitHub: Re-Nj-U/PH-Ledger). See [START-HERE.md](START-HERE.md) for the audited workflow. Older ZIPs and other local folders are separate copies.
+
 Start with [the go live guide](docs/VERCEL-GO-LIVE.md). The configured initial owner is `pikuholidays@gmail.com`.
 
 ## Business behavior
@@ -23,13 +25,11 @@ Copy `.env.example` to `.env.local`, fill it in privately, and configure the sam
 
 ```sh
 npm ci
-npm test
-npm run build
-npm run typecheck
+npm run verify
 npm run dev
 ```
 
-Build and typecheck run sequentially because Next.js writes generated type files. Supabase's transaction pooler connection uses SSL, port 6543 and prepared statements disabled. The database is accessed only from the server.
+Build and typecheck run sequentially because Next.js writes generated type files. Supabase's transaction pooler connection uses SSL, port 6543 and prepared statements disabled. TLS certificates are verified; DATABASE_SSL_CA can supply the database CA certificate. Queries are serialized on the connection to avoid transaction-pooler pipelining. The database is accessed only from the server.
 
 Optional checks/setup with a private local environment file:
 
@@ -46,6 +46,7 @@ The existing Sites deployment remains separate. Stop entry there before the fina
 
 ## Documentation
 
+- [Deployment audit, 17 October 2026](docs/DEPLOYMENT-AUDIT.md)
 - [Go live guide](docs/VERCEL-GO-LIVE.md)
 - [Vercel migration architecture](docs/MIGRATION-ARCHITECTURE.md)
 - [Original application blueprint](docs/APPLICATION-BLUEPRINT.md): documents the Sites baseline; financial rules still apply, but hosting/auth/transactions are superseded by the migration architecture.
