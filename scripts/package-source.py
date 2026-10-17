@@ -21,6 +21,15 @@ for group in ('dependencies', 'devDependencies', 'engines'):
 for name, package in lock['packages'].items():
     if name and not package.get('link') and not package.get('version'):
         raise RuntimeError(f'Incomplete dependency version: {name}')
+# Optional platform packages must be locked even when this Mac cannot install them.
+for name, package in lock['packages'].items():
+    dependencies = {**package.get('dependencies', {}), **package.get('optionalDependencies', {})}
+    for dependency in dependencies:
+        parent = Path(name or '.')
+        while (parent / 'node_modules' / dependency).as_posix() not in lock['packages']:
+            if parent == parent.parent:
+                raise RuntimeError(f'Missing locked dependency: {name or "root"} -> {dependency}')
+            parent = parent.parent
 for folder in FOLDERS:
     for path in (ROOT / folder).rglob('*'):
         if path.is_file() and not path.name.startswith('.') and '__pycache__' not in path.parts:
