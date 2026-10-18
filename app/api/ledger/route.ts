@@ -5,7 +5,7 @@ import { importLedger } from '../../../lib/import-ledger';
 import { resolveAccess } from '../../../lib/access';
 import { validateWriteRequest, readLedgerBody } from '../../../lib/request-security';
 import { entrySchema, settingsSchema, memberSchema } from '../../../lib/validation';
-import { assertRecordWriteAllowed, validateDueSettlement } from '../../../lib/record-rules';
+import { assertRecordWriteAllowed, validateDueSettlement, validateOtherDescription, validateTripSettlement } from '../../../lib/record-rules';
 import { databaseFailure } from '../../../lib/database-failure.mjs';
 import { defaultSettings, tripCategories, type Entry, partnerTotals, tripTotals, advanceDue, today } from '../../../lib/ledger';
 export const dynamic = 'force-dynamic';
@@ -129,6 +129,7 @@ export async function POST(request: Request) {
             throw new Error('Duplicate record IDs.');
         const effective = [...rs.filter(x => !entries.some(e => e.id === x.id)), ...entries], stmts: Statement[] = [];
         validateBalances(effective);
+        validateTripSettlement(body.settleTripId, entries, rs);
         for (const e of entries) {
             const old = rs.find(x => x.id === e.id);
             if (old && old.kind !== e.kind)
@@ -136,6 +137,7 @@ export async function POST(request: Request) {
             if (old && old.version !== e.version)
                 throw new Error('409:This record changed on another device. Refresh and try again.');
             assertRecordWriteAllowed(c.owner, e, old);
+            validateOtherDescription(e, old);
             if (e.date && e.date < c.settings.startDate && !e.opening)
                 throw new Error('Transaction date is before the ledger start date.');
             if (e.kind === 'due' && e.paidDate !== old?.paidDate)

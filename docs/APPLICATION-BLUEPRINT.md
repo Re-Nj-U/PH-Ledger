@@ -1,3 +1,7 @@
+# Current update — 18 October 2026
+
+The shared calendar now handles all date/month selection. Finishing a trip offers Completed — fully paid or Trip ended — payment pending. Fully paid completion saves the exact remaining receipt in the same atomic request after date/method confirmation. Pending completion still earns trip income and keeps the balance. No existing payment history is rewritten. Status labels, monthly reports and exports derive from the same receipts/refunds and report cutoff. Home-screen installation metadata/icons are included; live records require internet. See [Wrap-up](WRAP-UP.md) and [Simple flows](SIMPLE-FLOWS.md).
+
 # PIKU Holidays Ledger Application Blueprint
 
 Business workflows and technical reference
@@ -44,7 +48,7 @@ Desktop uses a left navigation bar. Mobile uses a bottom bar with shorter labels
 
 | Screen | Main information | Main actions |
 | --- | --- | --- |
-| Overview | Trip income, total expenses, monthly result, cash, six-month chart, recent trips, customer dues, partner dues and upcoming commitments | Add a trip, receive payment, record expense, partner transaction and open monthly report |
+| Overview | Available cash, customers owe, monthly result, partner debt, recent trips and upcoming commitments | Add a trip, update payment, record expense, partner transaction and open monthly report |
 | Trips | Trips intersecting the selected month, status filters, search and customer balances | Add or edit trip, open details, record payments and trip costs |
 | Monthly report | Itemised income, expenses, scheduled EMIs, monthly result, cash movements and month-end balances | Select month, open any entry and download formatted Excel or CSV |
 | Expenses and dues | Expense history by expense month, renewals and dues, vehicle and purchase EMI plans | Record expense, add due date, record commitment payment and owner loan setup |
@@ -65,27 +69,29 @@ View sample opens an independent, in-memory demonstration ledger. Changes in tha
 
 ### Create and complete a trip
 
-1. Select Add a trip and enter a name, customer, optional phone, start and end dates, starting odometer and agreed INR amount.
-2. Use the vehicle selection when more than one vehicle exists. The first vehicle is selected by default.
-3. Choose Upcoming or In progress as appropriate. An optional advance can be saved with a new trip; it creates a separate payment record.
-4. Record diesel, driver, permit and other trip expenses against that trip as the journey progresses.
-5. Enter the ending odometer and mark the trip Completed. The end date determines the income and trip-cost recognition month.
-6. Open the trip to record later payments and check the remaining customer balance.
+1. Select Add a trip and enter its name, date range, starting odometer and agreed INR amount. Customer name, phone and notes are in Optional details.
+2. Choose a vehicle when more than one exists. The first vehicle is selected by default.
+3. Use Upcoming or In progress while travelling. Advances and partial receipts can be entered in the Payments tab.
+4. Add diesel, driver, permits, fines and other trip expenses in the Expenses tab or later from Trip details.
+5. Enter the ending odometer. Choose Completed — fully paid to confirm the remaining receipt's date/method and save it with the trip; choose Trip ended — payment pending to leave the balance outstanding.
+6. Both ended choices count agreed income and trip costs in the trip end month. Payment records determine actual cash and any customer balance.
 
 The trip form permits trips lasting one day or several days. End date must be on or after start date. Ending odometer cannot be below the starting reading. Completing an ordinary trip requires an ending odometer. Kilometres are ending reading minus starting reading; an unfinished reading is shown as pending.
 
 ```mermaid
 flowchart LR
-  A[Create trip] --> B[Record advance and trip costs]
-  B --> C[Complete trip and ending odometer]
-  C --> D[Recognise agreed income and trip costs]
-  D --> E[Receive remaining customer payments]
-  E --> F[Customer balance settled]
+  A[Create trip] --> B[Record advances and trip costs]
+  B --> C[End trip and enter ending odometer]
+  C --> D{Customer fully paid?}
+  D -->|Yes| E[Confirm date and method; save remaining receipt with trip]
+  D -->|No| F[Payment pending; balance carries forward]
+  E --> G[Earned income and costs in trip end month]
+  F --> G
 ```
 
 ### Receive payments and issue refunds
 
-Select Receive payment, choose the trip and enter payment date, amount, type, method and notes. Methods are UPI, Bank transfer, Cash and Other. Advance, partial and full payments use the same receipt record; the difference is the amount remaining against the agreed trip value.
+Select Update payment for advances, partial receipts, corrections or refunds; choose the trip and enter payment date, amount, type, method and notes. Methods are UPI, Bank transfer, Cash and Other. Advance, partial and full payments use the same receipt record; the difference is the amount remaining against the agreed trip value.
 
 Customer receipts are summed by payment date. Refunds subtract from receipts and increase the remaining balance. A refund cannot exceed money already received as of its date. Overpayments are allowed and shown as customer credit. The headline Customers owe total adds only positive balances; credit on one trip does not offset another customer's debt.
 
@@ -198,7 +204,7 @@ Total kilometres = ending odometer minus starting odometer. Net customer receipt
 
 ### Cash and balances
 
-Cash at month end = opening cash plus customer receipts and partner contributions since ledger start, minus customer refunds, paid expenses, scheduled EMIs, partner repayments and distributions through month end. Expenses use payment date, with expense date as fallback; customer and partner transactions use their transaction date.
+Cash at month end = opening cash plus customer receipts and partner contributions since ledger start, minus customer refunds, paid expenses, actual EMI payments, partner repayments and distributions through month end. Expenses use payment date, with expense date as fallback; customer and partner transactions use their transaction date.
 
 The cash statement's brought-forward balance plus this month's inflows minus outflows equals month-end cash. In the ledger's first month the opening settings balance is included. A report before ledger start has no ledger cash movements or opening cash.
 
@@ -447,7 +453,7 @@ The reserve and cash-after-commitments calculation does not automatically reserv
 
 Standalone due items require full settlement. Ordinary non-EMI expenses have a paid or unpaid status rather than a partial-payment history. All partner contributions are currently repayable; permanent capital investment is not a separate transaction type.
 
-The application has no formal invoice generation, GST calculation, statutory accounts, customer refund fees, depreciation, rate-per-kilometre quotation or electronic payment collection. Insurance and other business costs are expensed in full on their recorded expense dates rather than amortised over a coverage period.
+The application has no formal invoice generation, GST calculation, statutory accounts, customer refund fees, depreciation, rate-per-kilometre quotation or electronic payment collection. Insurance and other business costs are expensed in full in their selected expense month rather than amortised over a coverage period.
 
 There is no offline write queue, instalment interest engine, receipt upload, automated notification delivery, built-in backup restore, scheduled backup job or separate balances by cash and bank account. The source blueprint describes current software behaviour; it does not assert compliance with an accounting or tax standard.
 

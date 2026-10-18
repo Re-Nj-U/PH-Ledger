@@ -6,7 +6,7 @@ Updated 18 October 2026. This supersedes the earlier rule that recognised EMI ex
 
 Create/edit a trip using Trip details, Expenses and Payments tabs. Customer name, phone and notes are optional. Select a start/end range, tapping the same date twice for a one-day trip. Add up to ten new costs and a received payment together; the server saves the batch atomically. Saved costs/payments retain their own editable records through Trip details.
 
-Diesel, driver, permit, fines and other trip costs follow the trip's completion month (or cancellation month for losses). Older fines without trip links remain business costs until explicitly changed. Completion means the journey ended; it does not create a customer payment. Customer balances carry until receipts or refunds settle them.
+Diesel, driver, permit, fines and other trip costs follow the trip's completion month (or cancellation month for losses). Older fines without trip links remain business costs until explicitly changed. When finishing, choose Completed — fully paid (records the remaining receipt with its confirmed date/method in the same save) or Trip ended — payment pending (creates no full-settlement receipt). Both count income when the journey ends. Customer balances carry until receipts or refunds settle them.
 
 ## Business expenses
 
@@ -39,3 +39,9 @@ The optional interest-based profit breakdown is incomplete until the scheduled i
 Summary, Income, Expenses and Cash & balances tabs keep the page shorter. Entries open their underlying details. Scheduled EMI rows open the plan schedule/history; down-payment rows open the plan. Excel and CSV include the full report regardless of the selected tab.
 
 Because the EMI rule changed, older reports can show different monthly results when payments were early, late or partial. Actual cash and stored payment history are unchanged. Backup/export retains new plan fields and expense month. No credentials, schema permissions or owner/partner access rules changed.
+
+## Shared experience rules
+
+All date and month fields use one calendar, including trip ranges, standalone payments, expenses, partner transactions, due dates, loan setup and business settings. The expense entry type selector remains visible when switching to a purchase EMI plan and preserves drafts for each type. Other trip/business costs require meaningful descriptions on new entries. Small motion/tap cues respect the operating system's reduced-motion setting.
+
+Displayed trip payment status is derived from dated receipts and refunds. Fully paid completion creates only the remaining receipt; repeating an edit adds no receipt if the trip is already settled. The server checks that the submitted settlement matches the current ledger and rejects stale balances before the atomic write. Existing ended/unpaid trips display payment pending without rewriting history. Payment corrections and refunds can change that derived status again.

@@ -57,3 +57,9 @@ Legacy Sites build helpers and SQLite migrations in this checkout are reference 
 ### Daily-entry improvements (18 October 2026)
 
 Trips use Details, Expenses and Payments tabs, a date-range calendar, and optional customer details. Diesel, driver, permit and trip fines stay with the trip. Business expenses default to the current expense month; actual cash uses payment dates. Monthly reports use Summary, Income, Expenses and Cash & balances tabs, with complete Excel exports. See `docs/SIMPLE-FLOWS.md` for examples and the changed EMI rule.
+
+### Final usability update (18 October 2026)
+
+Every date/month control uses the shared calendar. New expense choices remain visible and keep their drafts; Other costs require a description. Completed — fully paid records the remaining receipt in the same save after confirming its actual date/method. Trip ended — payment pending keeps earned income and customer debt. Existing history is never backfilled with invented payments. Reports, CSV and Excel derive status from the same dated payment records.
+
+Home-screen manifest and icons support mobile installation; an internet connection is still required. See `docs/WRAP-UP.md` for installation steps, test evidence, encryption boundaries and ASVS limitations.

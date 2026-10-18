@@ -1,6 +1,8 @@
 # Security review before Vercel migration
 
-**Latest update:** [17 October 2026 PH-Ledger deployment audit](DEPLOYMENT-AUDIT.md) records the current source fixes, 34 passing tests, verified-TLS connection configuration and current dependency findings. The dated results below are historical evidence; production/provider checks remain pending.
+**Current public checks and usability changes:** [18 October wrap-up](WRAP-UP.md). This adds limited unauthenticated production checks and a fresh production-only dependency scan; it is still not a full ASVS assessment. The dated sections below are retained as historical evidence.
+
+**Earlier update:** [17 October 2026 PH-Ledger deployment audit](DEPLOYMENT-AUDIT.md) records the current source fixes, 34 passing tests, verified-TLS connection configuration and current dependency findings. The dated results below are historical evidence; production/provider checks remain pending.
 
 Reviewed 11 October 2026. This is a scoped source review and local test record, **not a full ASVS assessment, certification, or penetration test**. No Supabase credentials or live Vercel project were available to the reviewer. Do not interpret a local build or an npm audit as proof of production security.
 

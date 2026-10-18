@@ -53,7 +53,7 @@ export function reportWorkbook(report: Report, name: string, month: string, rese
     const headlineValues = add([], 35);
     for (const [from, to] of [['A', 'B'], ['C', 'D'], ['E', 'F']]) merge(headlineValues, from, to);
     blank(); band('Income & expenses');
-    note('Agreed income and trip costs follow the trip completion month. Full scheduled EMIs are deducted in their due month; cash uses actual payment dates.');
+    note('Income and trip costs follow the journey end month; unpaid ended trips remain collectible. Full scheduled EMIs are deducted in their due month; cash uses actual payment dates.');
     header(['Date', 'Description', 'Details', 'Income (INR)', 'Expense (INR)', 'Notes']);
     const statement = [
         ...report.income.map(row => ({ ...row, income: true, category: 'Trip income' })),
