@@ -6,6 +6,7 @@ import { resolveAccess } from '../../../lib/access';
 import { validateWriteRequest, readLedgerBody } from '../../../lib/request-security';
 import { entrySchema, settingsSchema, memberSchema } from '../../../lib/validation';
 import { assertRecordWriteAllowed, validateDueSettlement } from '../../../lib/record-rules';
+import { databaseFailure } from '../../../lib/database-failure.mjs';
 import { defaultSettings, tripCategories, type Entry, partnerTotals, tripTotals, advanceDue, today } from '../../../lib/ledger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -21,7 +22,11 @@ function error(e: any) {
     const match = m.match(/^(\d{3}):(.+)$/);
     if (match) return json({ error: match[2] }, Number(match[1]));
     if (e.code === '23505') return json({ error: 'This record already exists. Refresh and try again.' }, 409);
-    if (e.code || e.severity) return json({ error: 'The database operation could not be completed. Check database setup or try again.' }, 503);
+    if (e.code || e.severity) {
+        const failure = databaseFailure(e);
+        console.error(JSON.stringify(failure.log));
+        return json({ error: failure.message, code: failure.code }, 503);
+    }
     return json({ error: m }, 400);
 }
 async function getRecords(db: LedgerDatabase) { const r = await db.prepare('SELECT * FROM records ORDER BY updated_at').all<any>(); return r.results.map(x => ({ ...JSON.parse(x.data), version: x.version })); }

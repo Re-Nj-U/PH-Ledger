@@ -1,6 +1,7 @@
 import postgres from 'postgres';
 import { postgresOptions } from '../lib/postgres-options.mjs';
 import { createClient } from '@supabase/supabase-js';
+import { databaseFailure } from '../lib/database-failure.mjs';
 
 const required = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'DATABASE_URL', 'OWNER_EMAIL'];
 const missing = required.filter(name => !process.env[name] || /YOUR-PROJECT|YOUR-PUBLISHABLE|YOUR-POOLER|YOUR-ENCODED/.test(process.env[name]));
@@ -32,8 +33,7 @@ try {
     } else console.log('Database schema, private-table access and Supabase Auth configuration checks passed.');
     console.log('Next: verify owner/partner sign-in and migrated balances in the deployed application.');
 } catch (error) {
-    if (['SELF_SIGNED_CERT_IN_CHAIN', 'DEPTH_ZERO_SELF_SIGNED_CERT', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY', 'CERT_HAS_EXPIRED', 'ERR_TLS_CERT_ALTNAME_INVALID'].includes(error.code))
-        console.error('Database TLS certificate verification failed. Check the pooler host and Supabase CA certificate; set server-only DATABASE_SSL_CA when required.');
+    if (error.code || error.severity) console.error(databaseFailure(error).message);
     console.error('Deployment check failed. Verify the Supabase URL, publishable key, pooler URI and schema.sql setup. Credentials were not printed.');
     process.exitCode = 1;
 } finally { await sql?.end(); }
