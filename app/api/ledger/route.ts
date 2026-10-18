@@ -148,6 +148,9 @@ export async function POST(request: Request) {
                 throw new Error('An actual expense payment cannot have a future date.');
             if (e.kind === 'expense' && e.paymentDate && e.paymentDate < c.settings.startDate)
                 throw new Error('Payment date is before the ledger start.');
+            if (e.kind === 'expense' && e.category === 'fine' && !e.tripId && !old && !e.linkedDueId) throw new Error('Select the trip for this fine.');
+            if (e.kind === 'expense' && e.expenseMonth && e.expenseMonth < c.settings.startDate.slice(0, 7)) throw new Error('Expense month is before the ledger start.');
+            if (e.kind === 'loan' && e.downPayment && (!e.downPaymentDate || e.downPaymentDate < c.settings.startDate || e.downPaymentDate > today())) throw new Error('Down payment must have an actual payment date within the ledger.');
             if (e.kind === 'expense' && !tripCategories.includes(e.category) && e.tripId)
                 throw new Error('Business expenses cannot be assigned as trip costs.');
             checkRef(effective, e.vehicleId, 'vehicle');

@@ -17,7 +17,7 @@ The source passes local deployment checks after the fixes below. No required sou
 - Added an automatic prebuild source check: Node 24, required files, local imports, manifest/lockfile agreement and complete locked normal/optional dependencies. It catches the earlier missing hook and missing Linux sharp dependency. The Vercel exclusions and source packager include this new script.
 - Added npm run verify for tests, production build and TypeScript checks in order. Updated setup instructions to use PH-Ledger consistently and stop mixing separate folders/ZIP versions.
 
-The agreed financial formulas were preserved: completed-trip agreed income and trip costs use the completion month; actual cash uses payment dates; the full paid EMI reduces the payment month's result and cash; partner funding, repayments and distributions stay separate from operating income/expenses.
+At the time of this audit, the financial formulas were preserved (the EMI rule was subsequently changed on 18 October; see SIMPLE-FLOWS.md): completed-trip agreed income and trip costs use the completion month; actual cash uses payment dates; the full paid EMI reduces the payment month's result and cash; partner funding, repayments and distributions stay separate from operating income/expenses.
 
 ## Verification performed
 

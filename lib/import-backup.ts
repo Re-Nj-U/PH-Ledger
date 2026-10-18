@@ -24,6 +24,8 @@ export function validateBackup(value: unknown) {
             throw new Error('A backup transaction is before the ledger start date.');
         if (['payment', 'partnerTx'].includes(record.kind) && record.date > today())
             throw new Error('A backup actual payment has a future date.');
+        if (record.kind === 'loan' && record.downPayment && (!record.downPaymentDate || record.downPaymentDate < backup.settings.startDate || record.downPaymentDate > today())) throw new Error('A backup down payment has an invalid payment date.');
+        if (record.kind === 'expense' && record.expenseMonth && record.expenseMonth < backup.settings.startDate.slice(0, 7)) throw new Error('A backup expense month is before the ledger start.');
         if (record.kind === 'expense') {
             if (!tripCategories.includes(record.category) && record.tripId)
                 throw new Error('A backup business expense is incorrectly linked to a trip.');

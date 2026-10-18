@@ -11,9 +11,10 @@ Start with [the go live guide](docs/VERCEL-GO-LIVE.md). The configured initial o
 - Record trips, odometers, agreed INR amounts, trip costs, advances, partial payments and customer balances.
 - Recognize agreed income and trip costs in the completion month. Cancelled-trip costs still count as losses.
 - Separate monthly result from cash received and available cash.
-- Deduct the full paid EMI from its payment month's result and cash, while keeping principal/interest breakdowns visible.
+- Deduct each scheduled EMI automatically in its due month; actual payments reduce cash once. Vehicle loans and purchases on EMI share one section, with optional down payments and principal/interest breakdowns.
 - Track renewals, unpaid commitments, loan instalments, partner contributions, repayments and distributions.
 - Show itemized monthly statements, cash reconciliation, customer/partner balances and clickable entry details.
+- Download formatted Excel monthly reports with numeric INR amounts, dates and formula totals. CSV remains available for data export.
 - Owners manage business settings/setup/users. Partners manage daily transactions.
 - The sample workspace uses memory only and does not save to the real ledger.
 
@@ -52,3 +53,7 @@ The existing Sites deployment remains separate. Stop entry there before the fina
 - [Original application blueprint](docs/APPLICATION-BLUEPRINT.md): documents the Sites baseline; financial rules still apply, but hosting/auth/transactions are superseded by the migration architecture.
 
 Legacy Sites build helpers and SQLite migrations in this checkout are reference only. The new scripts build for Vercel; do not publish the migrated source through the old Sites workflow.
+
+### Daily-entry improvements (18 October 2026)
+
+Trips use Details, Expenses and Payments tabs, a date-range calendar, and optional customer details. Diesel, driver, permit and trip fines stay with the trip. Business expenses default to the current expense month; actual cash uses payment dates. Monthly reports use Summary, Income, Expenses and Cash & balances tabs, with complete Excel exports. See `docs/SIMPLE-FLOWS.md` for examples and the changed EMI rule.

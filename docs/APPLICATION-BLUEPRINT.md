@@ -4,9 +4,11 @@ Business workflows and technical reference
 
 Version 1.1 · 10 October 2026 · Current implemented application
 
+**Updated 18 October 2026:** daily entry now uses shorter forms, report tabs and automatic EMI deductions in the scheduled due month. See [Simple flows](SIMPLE-FLOWS.md) for the current EMI examples. Existing payment history is preserved; historical results can change because scheduled instalments are now recognised in their due month.
+
 This document describes how we record trips, customer payments, expenses, loan payments and partner transactions in PIKU Holidays Ledger. It explains the current screens, financial rules, data relationships and technical implementation so both partners can use the application consistently and future changes can be reviewed against a shared reference.
 
-Our monthly result uses agreed amounts for completed trips and deducts trip costs, additional business expenses and the full EMI paid in that month. Available business cash is calculated separately from actual money received and paid. Customer dues and amounts owed to partners continue into later months until settled.
+Our monthly result uses agreed amounts for completed trips and deducts trip costs, additional business expenses and the full EMI scheduled for that month. Available business cash is calculated separately from actual money received and paid. Customer dues and amounts owed to partners continue into later months until settled.
 
 Application: https://piku-holidays-ledger.psrenju08.chatgpt.site/
 
@@ -44,8 +46,8 @@ Desktop uses a left navigation bar. Mobile uses a bottom bar with shorter labels
 | --- | --- | --- |
 | Overview | Trip income, total expenses, monthly result, cash, six-month chart, recent trips, customer dues, partner dues and upcoming commitments | Add a trip, receive payment, record expense, partner transaction and open monthly report |
 | Trips | Trips intersecting the selected month, status filters, search and customer balances | Add or edit trip, open details, record payments and trip costs |
-| Monthly report | Itemised income, expenses, full paid EMIs, monthly result, cash movements and month-end balances | Select month, open any entry and export CSV |
-| Expenses and dues | Expense history by expense date, upcoming and overdue commitments, vehicle loans | Record expense, add due date, record commitment payment and owner loan setup |
+| Monthly report | Itemised income, expenses, scheduled EMIs, monthly result, cash movements and month-end balances | Select month, open any entry and download formatted Excel or CSV |
+| Expenses and dues | Expense history by expense month, renewals and dues, vehicle and purchase EMI plans | Record expense, add due date, record commitment payment and owner loan setup |
 | Partners | Partner balances and monthly contribution, repayment and distribution history | Record contribution, repay partner or distribute money |
 | Settings | Business settings, opening balances, vehicles, partner accounts, owner user management, backup and recent changes | Configure business and accounts, activate users, export records |
 
@@ -95,17 +97,17 @@ The owner can add an opening customer balance from Settings. This is represented
 
 ## 4 Expense entry and recurring commitments
 
-The expense form changes according to category so daily entry stays short. All expenses have a description, amount, expense date and notes. A paid expense also has a payment date. For non-EMI entries, an unpaid status and due date can be recorded.
+The expense form changes according to category so daily entry stays short. Trip expenses have an actual expense date; business expenses have an expense month that defaults to the current month. All have a description, amount and optional notes. A paid expense also has a payment date. For non-EMI entries, an unpaid status and due date can be recorded.
 
 | Category | Additional fields and behaviour | Monthly treatment |
 | --- | --- | --- |
-| Diesel, driver, permit, other trip expense | Related trip is required; its vehicle is selected from the trip | Recognised in the completed or cancelled trip's end month |
+| Diesel, driver, permit, trip fine, other trip expense | Related trip is required; its vehicle is selected from the trip | Recognised in the completed or cancelled trip's end month |
 | Insurance | Optional vehicle, paid status, payment date, next insurance renewal and repeat frequency | Full amount in its expense month |
 | Road tax | Optional vehicle, paid status, payment date, next road tax due date and repeat frequency | Full amount in its expense month |
-| Maintenance, fine, other business expense | Optional vehicle, payment status and optional next due date | Full amount in its expense month |
-| Loan EMI | Loan, instalment, payment amount, payment date and optional principal and interest | Full actual payment deducted in payment month |
+| Maintenance, other business expense | Optional vehicle and payment status; no renewal fields | Full amount in its expense month |
+| Loan EMI | Loan, instalment, payment amount, payment date and optional principal and interest | Scheduled instalment deducted in due month; confirmed payment changes cash |
 
-An unpaid expense changes the relevant monthly cost and creates a commitment, while cash remains unchanged until paid. Expense history is filtered by the original expense date; the monthly report applies the recognition rules above. Consequently, a trip cost may appear in one month's expense history and another month's result.
+An unpaid expense changes the relevant monthly cost and creates a commitment, while cash remains unchanged until paid. Business expense history uses expense month, while trip expense history shows the original expense date; the monthly report applies the recognition rules above. Consequently, a trip cost may appear in one month's expense history and another month's result.
 
 ### Add and settle a due item
 
@@ -121,7 +123,7 @@ Entering a next renewal date on a direct insurance or business expense creates a
 
 ## 5 Vehicle loans and EMI tracking
 
-The owner sets up the loan with lender or loan name, vehicle, start date, first EMI due date, EMI amount, total instalments, instalments paid before ledger start, optional principal outstanding at ledger start and notes. This creates a calculated schedule without creating expense payments.
+The owner sets up the loan with lender or loan name, vehicle, start date, first EMI due date, EMI amount, total instalments, instalments paid before ledger start, optional principal outstanding at ledger start and notes. This creates a calculated schedule that automatically contributes each full instalment to its due month's result. Only confirmed payments reduce actual cash. The same record type supports purchase EMI plans, with an optional down payment recorded once.
 
 Each instalment's date is calculated from the original first-due date. For an anchor of 31 January, the following dates are 28 February and 31 March in a non-leap year. Short months clamp to their final day without shifting later months away from the original anchor.
 
@@ -142,7 +144,7 @@ Each instalment's date is calculated from the original first-due date. For an an
 
 The loan view shows paid and remaining instalments, the next unpaid scheduled date and recorded payment history. If opening principal is provided, displayed remaining principal subtracts the principal portions entered for later EMI payments. Missing splits make that estimate incomplete; the app does not calculate an amortisation schedule from an interest rate.
 
-The main monthly result follows our agreed rule: deduct the full EMI paid that month. A separate operating-profit figure excludes the EMI, while profit after loan interest deducts only known interest. If any paid EMI lacks an interest split, the report asks for the split rather than presenting a complete profit-after-interest figure.
+The main monthly result follows our agreed rule: deduct the full EMI scheduled in its due month. A separate operating-profit figure excludes the EMI, while profit after loan interest deducts only known interest. If any scheduled EMI lacks a complete interest split, the report asks for the split rather than presenting a complete profit-after-interest figure.
 
 The server rejects payments above an instalment's EMI value or against instalments already counted as paid before ledger start. Once payments exist, the schedule's EMI amount, total count, first due date and opening paid count cannot be changed directly. Variable EMIs, loan prepayments and interest recalculation require a future design change.
 
@@ -187,16 +189,16 @@ Total kilometres = ending odometer minus starting odometer. Net customer receipt
 | --- | --- |
 | Trip income | Agreed amounts of completed, non-opening trips ending in the selected month |
 | Trip expenses | All linked costs of completed or cancelled non-opening trips ending in that month, regardless of cost date or paid status |
-| Additional business expenses | Non-trip, non-EMI expenses dated in the selected month, including unpaid entries |
-| Full EMI paid | Paid EMI amounts whose payment date falls in that month; expense date is the fallback |
-| Total expenses | Trip expenses plus additional business expenses plus full EMI paid |
+| Additional business expenses | Non-trip, non-EMI expenses for the selected expense month (original date month for older records), including unpaid entries and purchase down payments |
+| Scheduled EMI | Full instalments due in the selected month, including amounts not yet paid |
+| Total expenses | Trip expenses plus additional business expenses plus scheduled EMI |
 | Monthly result | Trip income minus total expenses |
 | Operating profit before EMI | Trip income minus trip expenses minus additional business expenses |
-| Profit after loan interest | Operating profit minus interest in paid EMIs, complete only when all EMI interest splits are known |
+| Profit after loan interest | Operating profit minus known interest attributed to scheduled instalments, complete only when every scheduled EMI has a complete split |
 
 ### Cash and balances
 
-Cash at month end = opening cash plus customer receipts and partner contributions since ledger start, minus customer refunds, paid expenses, full paid EMIs, partner repayments and distributions through month end. Expenses use payment date, with expense date as fallback; customer and partner transactions use their transaction date.
+Cash at month end = opening cash plus customer receipts and partner contributions since ledger start, minus customer refunds, paid expenses, scheduled EMIs, partner repayments and distributions through month end. Expenses use payment date, with expense date as fallback; customer and partner transactions use their transaction date.
 
 The cash statement's brought-forward balance plus this month's inflows minus outflows equals month-end cash. In the ledger's first month the opening settings balance is included. A report before ledger start has no ledger cash movements or opening cash.
 
@@ -213,7 +215,7 @@ The Monthly report screen brings the month's recognised income and expenses into
 1. Trip income with completed trip rows, customer and trip end date.
 2. Trip expenses with category, related trip, original expense date and historical paid status.
 3. Additional business expenses such as insurance, road tax, maintenance and fines.
-4. Full paid EMI entries and monthly surplus or shortfall, with operating and interest-based profit figures.
+4. Scheduled EMI deductions and monthly surplus or shortfall, with operating and interest-based profit figures.
 5. Actual cash movements with brought-forward cash, inflows, outflows and closing cash.
 6. Customer balances and partner balances carried forward through month end.
 7. Unpaid commitments due through that month end, followed by the cash-after-commitments and reserve calculation in the cash section.
@@ -288,7 +290,7 @@ Trip statuses are Upcoming, In progress, Completed and Cancelled. These are sele
 | Due item | Name, category, amount, due date, optional vehicle, recurrence, optional paid date, notes | Independent schedule or a renewal created from an expense; remaining amount and historical status are calculated |
 | Loan | Name, vehicle ID, start date, first due date, EMI, total count, opening paid count, optional opening principal, notes | Due occurrences are generated from this record and reduced by linked paid EMI entries |
 
-Insurance, road tax, fine, maintenance and other business expense are valid standalone due categories. Loan instalments are generated from the loan rather than stored as ordinary due records. A linked direct renewal uses an ID derived from its originating expense.
+New renewal entry focuses on insurance and road tax. Older standalone due categories remain readable/importable for compatibility. New fines are trip expenses. Loan instalments are generated from the loan rather than stored as ordinary due records. A linked direct renewal uses an ID derived from its originating expense.
 
 ### Partners and vehicles
 

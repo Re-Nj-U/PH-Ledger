@@ -29,7 +29,7 @@ export type LedgerData = {
     audit: any[];
 };
 export const categories: Record<string, string> = { diesel: 'Diesel', driver: 'Driver', permit: 'Permit', tripOther: 'Other trip expense', insurance: 'Insurance', roadTax: 'Road tax', emi: 'Loan EMI', fine: 'Traffic fine', maintenance: 'Maintenance', other: 'Other business expense' };
-export const tripCategories = ['diesel', 'driver', 'permit', 'tripOther'];
+export const tripCategories = ['diesel', 'driver', 'permit', 'fine', 'tripOther'];
 export const defaultSettings: Settings = { name: 'PIKU Holidays', startDate: '2026-10-01', openingCash: 0, reserve: 0 };
 export const money = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: n % 100 === 0 ? 0 : 2 }).format(n / 100);
 export const paise = (n: unknown) => Math.round(Number(n) * 100);
@@ -61,20 +61,56 @@ export function partnerTotals(rs: Entry[], partner: Entry, until = '9999-12-31')
     const distributions = sum(tx.filter(x => x.type === 'distribution'));
     return { contributions, repayments, distributions, balance: (partner.openingAmount || 0) + contributions - repayments };
 }
+// Schedules drive monthly deductions; confirmed payments alone drive actual cash.
+export function loanSchedule(rs: Entry[]) {
+    return byKind(rs, 'loan').flatMap(loan => Array.from({ length: loan.total }, (_, i) => i)
+        .filter(i => i >= (loan.openingPaid || 0)).map(i => ({
+            id: `${loan.id}:${i}`, kind: 'expense' as const, source: 'loan', loanId: loan.id,
+            installment: i, title: `${loan.name} · EMI ${i + 1}`, name: loan.name,
+            description: `${loan.name} · EMI ${i + 1}`, dueDate: addMonths(loan.firstDue, i),
+            date: addMonths(loan.firstDue, i), amount: loan.emi, category: 'emi', vehicleId: loan.vehicleId,
+        })));
+}
+export function businessExpenses(rs: Entry[]): Entry[] {
+    const downPayments = byKind(rs, 'loan').filter(loan => loan.downPayment > 0).map(loan => ({
+        id: `${loan.id}:downpayment`, kind: 'expense' as const, source: 'downPayment', loanId: loan.id,
+        category: 'maintenance', description: `${loan.name} · Down payment`, amount: loan.downPayment,
+        date: loan.downPaymentDate || loan.start, paymentDate: loan.downPaymentDate || loan.start,
+        paid: true, vehicleId: loan.vehicleId, notes: loan.notes || '',
+    }));
+    return [...byKind(rs, 'expense'), ...downPayments];
+}
+export const expenseMonth = (e: Entry) => e.expenseMonth || monthOf(e.date);
+export function emiCharges(rs: Entry[], settings: Settings, month: string): Entry[] {
+    const end = monthEnd(month);
+    const scheduled = loanSchedule(rs).filter(e => monthOf(e.dueDate) === month && e.dueDate >= settings.startDate).map(e => {
+        const payments = byKind(rs, 'expense').filter(p => p.category === 'emi' && p.loanId === e.loanId && p.installment === e.installment && p.paid !== false && (p.paymentDate || p.date) <= end);
+        const received = sum(payments);
+        return { ...e, source: 'emiSchedule', paid: received >= e.amount, remaining: Math.max(0, e.amount - received),
+            interest: received >= e.amount && payments.every(p => p.interest != null) ? sum(payments, 'interest') : null };
+    });
+    // Preserve reports for legacy standalone EMI records without a usable loan schedule.
+    const standalone = byKind(rs, 'expense').filter(e => e.category === 'emi' && !rs.some(l => l.kind === 'loan' && l.id === e.loanId) && e.paid !== false && monthOf(e.paymentDate || e.date) === month);
+    return [...scheduled, ...standalone];
+}
 export function commitments(rs: Entry[], until = '9999-12-31'): any[] {
     const dues = byKind(rs, 'due').filter(x => !x.paidDate || x.paidDate > until).map(x => ({ ...x, remaining: x.amount, title: x.name, source: 'due' }));
     const unpaid = byKind(rs, 'expense').filter(x => x.paid === false || (x.paymentDate || x.date) > until).filter(x => x.category !== 'emi').map(x => ({ ...x, remaining: x.amount, dueDate: x.dueDate || x.date, title: x.description || categories[x.category], source: 'expense' }));
-    const scheduled = byKind(rs, 'loan').flatMap(loan => Array.from({ length: loan.total }, (_, i) => i).filter(i => i >= (loan.openingPaid || 0)).map(i => { const paid = sum(byKind(rs, 'expense').filter(x => x.category === 'emi' && x.loanId === loan.id && x.installment === i && x.paid !== false && (x.paymentDate || x.date) <= until)); return { id: `${loan.id}:${i}`, source: 'loan', loanId: loan.id, installment: i, title: `${loan.name} · EMI ${i + 1}`, name: loan.name, dueDate: addMonths(loan.firstDue, i), amount: loan.emi, remaining: Math.max(0, loan.emi - paid), category: 'emi', vehicleId: loan.vehicleId }; }).filter(x => x.remaining > 0));
+    const scheduled = loanSchedule(rs).map(e => {
+        const paid = sum(byKind(rs, 'expense').filter(x => x.category === 'emi' && x.loanId === e.loanId && x.installment === e.installment && x.paid !== false && (x.paymentDate || x.date) <= until));
+        return { ...e, remaining: Math.max(0, e.amount - paid) };
+    }).filter(e => e.remaining > 0);
     return [...dues, ...unpaid, ...scheduled].sort((a: any, b: any) => a.dueDate.localeCompare(b.dueDate));
 }
 export function monthly(rs: Entry[], settings: Settings, month: string) {
     const end = monthEnd(month), inMonth = (x: Entry) => monthOf(x.date) === month;
     const trips = byKind(rs, 'trip').filter(x => x.status === 'completed' && !x.opening && monthOf(x.end) === month);
-    const income = sum(trips), tripExpense = sum(byKind(rs, 'expense').filter(x => byKind(rs, 'trip').some(t => t.id === x.tripId && !t.opening && ['completed', 'cancelled'].includes(t.status) && monthOf(t.end) === month))), businessExpense = sum(byKind(rs, 'expense').filter(x => !x.tripId && x.category !== 'emi' && inMonth(x)));
-    const emiEntries = byKind(rs, 'expense').filter(x => x.category === 'emi' && monthOf(x.paymentDate || x.date) === month && x.paid !== false), emi = sum(emiEntries), interest = sum(emiEntries, 'interest'), operating = income - tripExpense - businessExpense;
+    const expenses = businessExpenses(rs);
+    const income = sum(trips), tripExpense = sum(expenses.filter(x => byKind(rs, 'trip').some(t => t.id === x.tripId && !t.opening && ['completed', 'cancelled'].includes(t.status) && monthOf(t.end) === month))), businessExpense = sum(expenses.filter(x => !x.tripId && x.category !== 'emi' && expenseMonth(x) === month));
+    const emiEntries = emiCharges(rs, settings, month), emi = sum(emiEntries), interest = sum(emiEntries, 'interest'), operating = income - tripExpense - businessExpense;
     const receipts = byKind(rs, 'payment').filter(inMonth).reduce((s, x) => s + (x.type === 'refund' ? -x.amount : x.amount), 0);
     const dated = rs.filter(x => x.date >= settings.startDate && x.date <= end), cashReceipts = byKind(dated, 'payment').reduce((s, x) => s + (x.type === 'refund' ? -x.amount : x.amount), 0);
-    const cashExpenses = sum(byKind(rs, 'expense').filter(x => x.paid !== false && (x.paymentDate || x.date) >= settings.startDate && (x.paymentDate || x.date) <= end));
+    const cashExpenses = sum(expenses.filter(x => x.paid !== false && (x.paymentDate || x.date) >= settings.startDate && (x.paymentDate || x.date) <= end));
     const partnerCash = byKind(dated, 'partnerTx').reduce((s, x) => s + (x.type === 'contribution' ? x.amount : -x.amount), 0), cash = (end >= settings.startDate ? settings.openingCash : 0) + cashReceipts - cashExpenses + partnerCash;
     const outstanding = byKind(rs, 'trip').filter(x => x.start <= end && x.status !== 'cancelled').reduce((s, t) => s + Math.max(0, tripTotals(rs, t, end).balance), 0), partners = end >= settings.startDate ? byKind(rs, 'partner').reduce((s, p) => s + partnerTotals(rs, p, end).balance, 0) : 0;
     const committed = sum(commitments(rs, end).filter(x => x.dueDate <= end), 'remaining');
