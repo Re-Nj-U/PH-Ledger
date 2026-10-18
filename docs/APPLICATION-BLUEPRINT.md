@@ -1,6 +1,6 @@
 # Current update — 18 October 2026
 
-The shared calendar now handles all date/month selection. Finishing a trip offers Completed — fully paid or Trip ended — payment pending. Fully paid completion saves the exact remaining receipt in the same atomic request after date/method confirmation. Pending completion still earns trip income and keeps the balance. No existing payment history is rewritten. Status labels, monthly reports and exports derive from the same receipts/refunds and report cutoff. Home-screen installation metadata/icons are included; live records require internet. See [Wrap-up](WRAP-UP.md) and [Simple flows](SIMPLE-FLOWS.md).
+The shared overlay calendar handles all date/month selection without moving form fields. Add trip keeps Trip details, Expenses and Payments tabs and defaults to Completed — paid. New paid trips use their end date for the receipt; settling an existing payment-pending trip defaults to today, with a Change control for the actual date. Payment method is no longer requested. Cancellation/refunds live in Trip details. Trips lists and normal details show current payment state; monthly reports and exports keep historical month-end cutoffs. No existing payment history is rewritten. See [Wrap-up](WRAP-UP.md) and [Simple flows](SIMPLE-FLOWS.md).
 
 # PIKU Holidays Ledger Application Blueprint
 
@@ -14,7 +14,7 @@ This document describes how we record trips, customer payments, expenses, loan p
 
 Our monthly result uses agreed amounts for completed trips and deducts trip costs, additional business expenses and the full EMI scheduled for that month. Available business cash is calculated separately from actual money received and paid. Customer dues and amounts owed to partners continue into later months until settled.
 
-Application: https://piku-holidays-ledger.psrenju08.chatgpt.site/
+Application: https://ph-ledger.vercel.app/
 
 Source baseline: f8e0cdf064cbde3b327940d2b1fcba0e84cf976c. This blueprint reflects the monthly report release. Examples use fictional records and INR amounts, not the business's actual balances. Suggested improvements in the final section are not implemented commitments.
 
@@ -71,9 +71,9 @@ View sample opens an independent, in-memory demonstration ledger. Changes in tha
 
 1. Select Add a trip and enter its name, date range, starting odometer and agreed INR amount. Customer name, phone and notes are in Optional details.
 2. Choose a vehicle when more than one exists. The first vehicle is selected by default.
-3. Use Upcoming or In progress while travelling. Advances and partial receipts can be entered in the Payments tab.
+3. New trips default to Completed — paid. Choose Upcoming for a journey that has not ended. Advances and partial receipts can be entered in the Payments tab.
 4. Add diesel, driver, permits, fines and other trip expenses in the Expenses tab or later from Trip details.
-5. Enter the ending odometer. Choose Completed — fully paid to confirm the remaining receipt's date/method and save it with the trip; choose Trip ended — payment pending to leave the balance outstanding.
+5. Enter the ending odometer. Completed — paid saves the remaining receipt with the trip. New completions use the end date; later settlement of an already-ended trip defaults to today. Use Change for a different actual payment date. Choose Completed — payment pending to keep the balance outstanding.
 6. Both ended choices count agreed income and trip costs in the trip end month. Payment records determine actual cash and any customer balance.
 
 The trip form permits trips lasting one day or several days. End date must be on or after start date. Ending odometer cannot be below the starting reading. Completing an ordinary trip requires an ending odometer. Kilometres are ending reading minus starting reading; an unfinished reading is shown as pending.
@@ -83,7 +83,7 @@ flowchart LR
   A[Create trip] --> B[Record advances and trip costs]
   B --> C[End trip and enter ending odometer]
   C --> D{Customer fully paid?}
-  D -->|Yes| E[Confirm date and method; save remaining receipt with trip]
+  D -->|Yes| E[Save remaining receipt using actual payment date]
   D -->|No| F[Payment pending; balance carries forward]
   E --> G[Earned income and costs in trip end month]
   F --> G
@@ -91,11 +91,11 @@ flowchart LR
 
 ### Receive payments and issue refunds
 
-Select Update payment for advances, partial receipts, corrections or refunds; choose the trip and enter payment date, amount, type, method and notes. Methods are UPI, Bank transfer, Cash and Other. Advance, partial and full payments use the same receipt record; the difference is the amount remaining against the agreed trip value.
+Select Update payment for advances and partial receipts; choose the trip, payment date, amount and optional notes. Settle an ended trip by editing it to Completed — paid. Refunds and cancellation are in Trip details. New receipts use the internal method Other; existing methods remain stored. Advance, partial and full payments use the same receipt record; the difference is the amount remaining against the agreed trip value.
 
 Customer receipts are summed by payment date. Refunds subtract from receipts and increase the remaining balance. A refund cannot exceed money already received as of its date. Overpayments are allowed and shown as customer credit. The headline Customers owe total adds only positive balances; credit on one trip does not offset another customer's debt.
 
-A trip cannot be cancelled while it still holds a positive net customer receipt. Refund the customer's money first. A cancelled trip creates no agreed income, but its recorded trip costs remain a loss in its end month. The application does not model a cancellation fee or forfeited advance separately.
+Cancelling a trip with a positive net receipt requires confirmation of the full refund and actual refund date. The cancellation and refund are saved together; alternatively, record refunds separately from Trip details. A cancelled trip creates no agreed income, but its recorded trip costs remain a loss in its end month. The application does not model a cancellation fee or forfeited advance separately.
 
 ### Opening customer dues
 
@@ -284,7 +284,7 @@ Each record has an ID, kind and optional notes. Stored records also have a versi
 | Trip | Name, customer, phone, vehicle ID, start and end dates, starting and ending odometers, agreed amount, status, opening flag, notes | One vehicle; many payments and trip expenses. Kilometres, receipts, balance and profit are calculated |
 | Payment | Trip ID, amount, date, receipt or refund type, method, notes | Belongs to one trip; affects cash by date and that trip's customer balance |
 
-Trip statuses are Upcoming, In progress, Completed and Cancelled. These are selectable states; the app does not enforce a rigid one-way transition sequence. Opening trips represent customer receivables brought into the ledger.
+Stored trip statuses are Upcoming, Completed and Cancelled, plus legacy In progress records displayed as Upcoming. The form offers Completed — paid, Completed — payment pending and Upcoming. Both completed choices store Completed; dated receipts/refunds determine whether a balance remains. Cancellation is a separate Trip details action. Opening trips represent customer receivables brought into the ledger.
 
 ### Expenses and commitments
 

@@ -33,14 +33,14 @@ test('completed fully paid saves the exact remaining receipt once and keeps earn
  let n=0;const form={completionOutcome:'paid',newPaymentDate:'2026-03-01',newPaymentMethod:'UPI',newPaymentAmount:99999};
  const batch=tripEntries(t,form,()=>`p-${++n}`,[advance]);assert.equal(batch.length,2);assert.equal(batch[1].amount,800000);assert.equal(batch[1].date,'2026-03-01');
  assert.doesNotThrow(()=>validateTripSettlement(t.id,batch,[advance]));const rs=[advance,...batch];
- assert.equal(tripStatusLabel(rs,t,'2026-02-28'),'Trip ended — payment pending');assert.equal(tripStatusLabel(rs,t,'2026-03-31'),'Completed — fully paid');
+ assert.equal(tripStatusLabel(rs,t,'2026-02-28'),'Completed — payment pending');assert.equal(tripStatusLabel(rs,t,'2026-03-31'),'Completed — paid');
  assert.equal(monthly(rs,s,'2026-02').income,1000000);assert.equal(monthly(rs,s,'2026-02').receipts,0);assert.equal(monthly(rs,s,'2026-03').income,0);assert.equal(monthly(rs,s,'2026-03').receipts,800000);
  const repeat=tripEntries(t,form,()=>`p-${++n}`,rs);assert.equal(repeat.length,1);assert.doesNotThrow(()=>validateTripSettlement(t.id,repeat,rs));
  const report=monthlyReport(rs,s,'2026-02');assert.match(report.income[0].detail,/payment pending/);assert.equal(report.customers[0].amount,800000);
  const excel=reportWorkbook(report,'PIKU','2026-02',0);assert.ok(excel.rows.some(row=>row.cells.some(c=>typeof c.value==='string'&&c.value.includes('payment pending'))));
 });
 test('payment pending never invents receipts; old completed balances remain correct across report and export',()=>{
- const batch=tripEntries(t,{completionOutcome:'pending'},()=> 'none',[advance]);assert.equal(batch.length,1);const rs=[advance,...batch];assert.equal(tripTotals(rs,t).balance,800000);assert.equal(tripStatusLabel(rs,t),'Trip ended — payment pending');assert.equal(monthly(rs,s,'2026-02').income,1000000);assert.equal(monthlyReport(rs,s,'2026-02').cashIn,0);
+ const batch=tripEntries(t,{completionOutcome:'pending'},()=> 'none',[advance]);assert.equal(batch.length,1);const rs=[advance,...batch];assert.equal(tripTotals(rs,t).balance,800000);assert.equal(tripStatusLabel(rs,t),'Completed — payment pending');assert.equal(monthly(rs,s,'2026-02').income,1000000);assert.equal(monthlyReport(rs,s,'2026-02').cashIn,0);
 });
 test('settlement rejects stale balances and altered existing receipts instead of collecting twice',()=>{
  const batch=tripEntries(t,{completionOutcome:'paid',newPaymentDate:'2026-02-01',newPaymentMethod:'Cash'},()=> 'new',[advance]);

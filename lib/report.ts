@@ -16,7 +16,7 @@ export function monthlyReport(records: Entry[], settings: Settings, month: strin
         return ['payment', 'expense', 'partnerTx'].includes(e.kind) && date >= settings.startDate && monthOf(date) === month && (e.kind !== 'expense' || e.paid !== false);
     }).map(e => {
         if (e.kind === 'expense') return { ...expenseRow(e), date: e.paymentDate || e.date, amount: -e.amount };
-        if (e.kind === 'payment') return { entry: e, date: e.date, title: e.type === 'refund' ? 'Customer refund' : 'Customer payment', detail: [find(e.tripId)?.name, e.method].filter(Boolean).join(' · '), amount: e.type === 'refund' ? -e.amount : e.amount };
+        if (e.kind === 'payment') return { entry: e, date: e.date, title: e.type === 'refund' ? 'Customer refund' : 'Customer payment', detail: [find(e.tripId)?.name, e.method !== 'Other' ? e.method : ''].filter(Boolean).join(' · '), amount: e.type === 'refund' ? -e.amount : e.amount };
         return { entry: e, date: e.date, title: e.type === 'contribution' ? 'Partner contribution' : e.type === 'repayment' ? 'Partner repayment' : 'Profit distribution', detail: find(e.partnerId)?.name || 'Partner', amount: e.type === 'contribution' ? e.amount : -e.amount };
     }));
     const cashIn = cash.reduce((s, x) => s + Math.max(0, x.amount), 0), cashOut = cash.reduce((s, x) => s + Math.max(0, -x.amount), 0);

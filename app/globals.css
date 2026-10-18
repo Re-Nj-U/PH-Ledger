@@ -882,8 +882,19 @@ h1{font-size:35px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(max-width:760px){.date-trigger{font-size:13px;min-height:48px}.date-popover{padding:12px}.date-popover .calendar-days button{min-height:36px}.date-calendar-selectors select{font-size:12px}.expense-mode-tabs>button{font-size:11px;min-width:100px}.field>input,.field>textarea,.field>select{font-size:16px}.install-guide{padding-left:20px;padding-right:20px}}
 .month-picker>.date-control{display:block;border:0;margin:0;padding:0}.date-calendar-selectors select{width:auto;max-width:145px;min-height:36px;padding:7px 5px}.date-popover .calendar-days{min-width:245px}
-@media(max-width:760px){.form-grid:has(.date-popover){grid-template-columns:1fr}.date-popover{width:100%;max-width:350px}.expense-mode-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.expense-mode-tabs>button{min-width:0}.date-trigger small{font-size:10px}}
-.form-grid:has(.date-popover){grid-template-columns:1fr}
+@media(max-width:760px){.date-popover{width:100%;max-width:350px}.expense-mode-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.expense-mode-tabs>button{min-width:0}.date-trigger small{font-size:10px}}
+
 .settlement-confirm{margin-top:20px;background:var(--primary-soft);border:1px solid var(--line);border-radius:10px;padding:18px}.settlement-confirm p{font-size:12px;line-height:1.8;margin-bottom:12px}.settlement-confirm .form-grid{margin-top:16px}
 
 .trip-table .badge{white-space:normal;line-height:1.5;max-width:155px}.trip-table .badge>span{flex-shrink:0}.detail-top .badge{white-space:normal;line-height:1.5}
+
+/* Calendars float above the form, including above native modal dialogs. */
+.date-control .date-popover[popover],.date-control.compact .date-popover[popover]{position:fixed;inset:auto;margin:0;width:min(350px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;z-index:1000;color:var(--primary);padding:16px}
+.date-popover::backdrop{background:transparent}.date-control .date-popover[data-fallback=true]{display:block}
+.receipt-date{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.receipt-date .date-control.compact .date-trigger{font-size:12px;text-decoration:underline;color:var(--primary);min-height:36px;padding:3px 5px}.trip-receipt-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:13px 0 0;color:var(--primary);font-size:12px}.trip-payment-note{font-size:12px;line-height:1.8;margin-top:16px}.trip-payment-note .text-button{font-size:12px;text-decoration:underline}.trip-actions{margin-top:24px;border-top:1px solid var(--line);padding-top:18px}.trip-actions summary{cursor:pointer;font-size:12px;color:var(--muted)}.trip-actions>div{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}.current-balance-note{font-size:11px;color:var(--muted);padding:14px 22px;border-bottom:1px solid var(--line)}.trip-payment-totals{grid-template-columns:1fr 1fr;margin:18px 0}.trip-cancel-note{font-size:13px;line-height:1.8;margin-bottom:20px}
+@media(max-width:760px){.date-popover::backdrop{background:#173c2a33}.date-control .date-popover[popover],.date-control.compact .date-popover[popover]{padding:14px}.trip-receipt-summary{align-items:flex-start;flex-direction:column;gap:3px}.trip-payment-totals{grid-template-columns:1fr 1fr}}
+.trip-money-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.trip-payment-totals>div:last-child{grid-column:auto}
+
+.date-control.compact[data-mode=date] .date-calendar-top>.icon-button{display:inline-flex}
+
+@media(max-width:760px){.trip-primary-fields>.field:nth-last-child(-n+2){grid-column:1/-1}}

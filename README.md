@@ -60,6 +60,6 @@ Trips use Details, Expenses and Payments tabs, a date-range calendar, and option
 
 ### Final usability update (18 October 2026)
 
-Every date/month control uses the shared calendar. New expense choices remain visible and keep their drafts; Other costs require a description. Completed — fully paid records the remaining receipt in the same save after confirming its actual date/method. Trip ended — payment pending keeps earned income and customer debt. Existing history is never backfilled with invented payments. Reports, CSV and Excel derive status from the same dated payment records.
+Every date/month control uses a shared overlay calendar that stays above dialogs without moving the form. Add trip keeps Trip details, Expenses and Payments tabs and defaults to Completed — paid. The initial receipt uses the trip end date; settling an existing payment-pending trip defaults to today. A small Change control lets users correct the actual receipt date. No payment method is required. Cancellation and refunds are in Trip details. Trips lists and normal details show current balances; monthly reports, CSV and Excel show month-end balances from the same dated receipts/refunds. Existing history is never backfilled with invented payments.
 
 Home-screen manifest and icons support mobile installation; an internet connection is still required. See `docs/WRAP-UP.md` for installation steps, test evidence, encryption boundaries and ASVS limitations.

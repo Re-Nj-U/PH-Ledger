@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const required = ['app/page.tsx', 'app/layout.tsx', 'app/login/page.tsx', 'app/api/ledger/route.ts',
-    'hooks/use-mobile.ts', 'app/date-picker.tsx', 'app/manifest.ts', 'public/icons/icon-192.png', 'public/icons/icon-512.png', 'public/icons/apple-touch-icon.png', 'public/icons/maskable-512.png', 'app/trip-fields.tsx', 'app/emi-plans.tsx', 'lib/trip-entry.ts', 'supabase/schema.sql', '.gitignore', '.vercelignore', '.env.example', '.npmrc', '.nvmrc',
+    'hooks/use-mobile.ts', 'app/date-picker.tsx', 'app/manifest.ts', 'public/icons/icon-192.png', 'public/icons/icon-512.png', 'public/icons/apple-touch-icon.png', 'public/icons/maskable-512.png', 'app/trip-fields.tsx', 'app/emi-plans.tsx', 'lib/trip-entry.ts', 'lib/trip-view.ts', 'supabase/schema.sql', '.gitignore', '.vercelignore', '.env.example', '.npmrc', '.nvmrc',
     'vercel.json', 'next.config.ts', 'tsconfig.json', 'package.json', 'package-lock.json'];
 try {
     if (Number(process.versions.node.split('.')[0]) !== 24) throw new Error('Use Node.js 24.x (run nvm use if nvm is installed).');

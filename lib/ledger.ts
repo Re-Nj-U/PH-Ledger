@@ -53,8 +53,8 @@ export function tripTotals(rs: Entry[], trip: Entry, until = '9999-12-31') {
 }
 export function tripStatusLabel(rs: Entry[], trip: Entry, until = '9999-12-31') {
     if (trip.opening) return 'Opening customer balance';
-    if (trip.status === 'completed') return tripTotals(rs, trip, until).balance > 0 ? 'Trip ended — payment pending' : 'Completed — fully paid';
-    return ({ upcoming: 'Upcoming', in_progress: 'In progress', cancelled: 'Cancelled' } as Record<string, string>)[trip.status] || trip.status;
+    if (trip.status === 'completed') return tripTotals(rs, trip, until).balance > 0 ? 'Completed — payment pending' : 'Completed — paid';
+    return ({ upcoming: 'Upcoming', in_progress: 'Upcoming', cancelled: 'Cancelled' } as Record<string, string>)[trip.status] || trip.status;
 }
 export function customerDues(rs: Entry[], until: string) {
     return byKind(rs, 'trip').filter(trip => trip.start <= until && trip.status !== 'cancelled' && tripTotals(rs, trip, until).balance > 0);

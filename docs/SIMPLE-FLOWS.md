@@ -6,7 +6,7 @@ Updated 18 October 2026. This supersedes the earlier rule that recognised EMI ex
 
 Create/edit a trip using Trip details, Expenses and Payments tabs. Customer name, phone and notes are optional. Select a start/end range, tapping the same date twice for a one-day trip. Add up to ten new costs and a received payment together; the server saves the batch atomically. Saved costs/payments retain their own editable records through Trip details.
 
-Diesel, driver, permit, fines and other trip costs follow the trip's completion month (or cancellation month for losses). Older fines without trip links remain business costs until explicitly changed. When finishing, choose Completed — fully paid (records the remaining receipt with its confirmed date/method in the same save) or Trip ended — payment pending (creates no full-settlement receipt). Both count income when the journey ends. Customer balances carry until receipts or refunds settle them.
+Diesel, driver, permit, fines and other trip costs follow the trip's end month, including costs on cancelled trips. Older fines without trip links remain business costs until explicitly changed. New trips default to Completed — paid (records the remaining receipt on the trip end date in the same save) or Completed — payment pending (creates no full-settlement receipt). Both count income when the journey ends. Customer balances carry until receipts or refunds settle them.
 
 ## Business expenses
 
@@ -42,6 +42,14 @@ Because the EMI rule changed, older reports can show different monthly results w
 
 ## Shared experience rules
 
-All date and month fields use one calendar, including trip ranges, standalone payments, expenses, partner transactions, due dates, loan setup and business settings. The expense entry type selector remains visible when switching to a purchase EMI plan and preserves drafts for each type. Other trip/business costs require meaningful descriptions on new entries. Small motion/tap cues respect the operating system's reduced-motion setting.
+All date and month fields use one overlay calendar that appears above dialogs without changing form layout, including trip ranges, standalone payments, expenses, partner transactions, due dates, loan setup and business settings. The expense entry type selector remains visible when switching to a purchase EMI plan and preserves drafts for each type. Other trip/business costs require meaningful descriptions on new entries. Small motion/tap cues respect the operating system's reduced-motion setting.
 
 Displayed trip payment status is derived from dated receipts and refunds. Fully paid completion creates only the remaining receipt; repeating an edit adds no receipt if the trip is already settled. The server checks that the submitted settlement matches the current ledger and rejects stale balances before the atomic write. Existing ended/unpaid trips display payment pending without rewriting history. Payment corrections and refunds can change that derived status again.
+
+## Simplified trip entry and current balances
+
+The three tabs remain. The only ordinary status choices are Completed — paid, Completed — payment pending and Upcoming. Older In progress records appear as Upcoming without creating income or payments. Payment method is no longer requested; existing methods remain stored. Cancellation/refunds are available from Trip details. Cancelling a trip with money received requires confirmation of the full remaining refund and its actual date, saved atomically with the cancellation.
+
+A new paid trip defaults to its end date for the receipt. If an already-ended trip is settled later, the receipt defaults to today. Use Change to select the actual payment date if different. Income stays in the trip end month; a later receipt changes cash only in the receipt month. Editing an already paid trip adds no duplicate receipt.
+
+Trips lists, current customer balances and normal Trip details use all recorded receipts/refunds. Selecting a month on Trips chooses journeys, not a historical payment cutoff. Monthly reports and Excel/CSV intentionally show status and balance as of month end, including payment-pending balances that were settled later. Report details state the cutoff explicitly. No existing receipts are redated automatically.

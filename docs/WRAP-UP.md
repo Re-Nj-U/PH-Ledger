@@ -31,16 +31,22 @@ References: [Apple instructions](https://support.apple.com/guide/iphone/bookmark
 
 ## Consistent trip/payment rules
 
-Completed — fully paid confirms the remaining payment and writes it with the trip in one atomic batch, using the actual payment date/method confirmed on the form. Existing advances are deducted. Editing an already settled trip adds no duplicate receipt. A server check rejects a settlement if another device changed the balance first; the database revision guard also prevents writes racing after validation.
+Completed — paid confirms the remaining payment and writes it with the trip in one atomic batch, using the trip end date for a new completion or today for a later settlement, with a Change control for the actual receipt date. Existing advances are deducted. Editing an already settled trip adds no duplicate receipt. A server check rejects a settlement if another device changed the balance first; the database revision guard also prevents writes racing after validation.
 
-Trip ended — payment pending marks the journey ended without inventing a full payment. It still counts agreed trip income and trip expenses in its end month. Its balance carries until paid. Existing completed/unpaid trips display this pending label without migrating their stored data. Labels use the selected cutoff when viewed in reports.
+Completed — payment pending marks the journey ended without inventing a full payment. It still counts agreed trip income and trip expenses in its end month. Its balance carries until paid. Existing completed/unpaid trips display this pending label without migrating their stored data. Labels use the selected cutoff when viewed in reports.
 
-Trip details, filters, customer balances, dashboard cash, monthly report, CSV and Excel all use the same underlying dated receipts/refunds. Refunds or corrections can restore a pending balance. Advances, partial payments and refunds remain available through Update payment and the trip's Payments tab; fully paid trips have no redundant collection button in their payment history.
+Trip details, filters, customer balances, dashboard cash, monthly report, CSV and Excel all use the same underlying dated receipts/refunds. Refunds or corrections can restore a pending balance. Advances and partial payments remain available through Update payment and the trip's Payments tab; cancellation and refunds live in Trip details; fully paid trips have no redundant collection button in their payment history.
 
 ## UI corrections
 
-All day/month fields share one styled calendar with month/year selection, Today/This month, date ranges, optional Clear, min/max dates and keyboard Escape. This includes business settings, expenses, EMI plans, partner transactions, payment forms and report month selection.
+All day/month fields share one styled overlay calendar with month/year selection, Today/This month, date ranges, optional Clear, min/max dates and keyboard Escape. This includes business settings, expenses, EMI plans, partner transactions, payment forms and report month selection.
 
 Trip expense, Business expense and Bought on EMI remain available in the same expense-entry flow. Switching preserves the draft for each choice until the dialog is closed. Other expense descriptions are required for new or changed generic records; older generic records remain readable/importable. Tap, dialog, selection and success cues respect reduced-motion preferences.
 
 No SQL migration or new dependency is required. Deploy the entire source update including public/icons; keep secrets in Vercel environment settings.
+
+## Final trip simplification check — 18 October 2026
+
+New entries default to Completed — paid and retain the Trip details, Expenses and Payments tabs. In progress and payment-method selectors are removed. Trip amount is the agreed total. Current Trips lists and normal details share current payment totals; monthly reports/exports retain historical month-end totals. Late settlement defaults to today rather than silently backdating cash. Original payment records are preserved.
+
+The calendar uses a native top-layer popover (with a positioned fallback). Desktop and 390 × 844 mobile checks verified that opening the calendar does not change form geometry; Escape closes only the calendar. A sample September trip settled in October showed paid in the current list/details, unpaid in September's report, and one dated October receipt. Cancellation confirmed and recorded one full refund. No SQL migration or dependency change is needed for this update.
