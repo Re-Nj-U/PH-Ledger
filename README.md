@@ -67,3 +67,7 @@ Home-screen manifest and icons support mobile installation; an internet connecti
 ### Transfer ownership
 
 Settings → Business owner lets the current owner transfer control to an active partner who has successfully signed in. The current owner confirms the selected email and re-enters their password; their account becomes a partner. The change is atomic and recorded in Recent changes. No data migration is required. See [Owner transfer](docs/OWNER-TRANSFER.md) for the exact steps and checks.
+
+### Inactivity sign-out
+
+The ledger signs users out after 30 minutes without activity, with a one-minute warning and Stay signed in action. The server enforces the signed deadline; background data refreshes do not keep a session alive. Tabs share activity, and laptop sleep is checked when returning. Existing sessions need one fresh login after deployment. No database migration or new environment variable is needed. See [Session timeout](docs/SESSION-TIMEOUT.md).

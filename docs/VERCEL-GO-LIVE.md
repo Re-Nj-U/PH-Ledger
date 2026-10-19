@@ -185,3 +185,7 @@ Keep a regular ledger JSON export. Supabase backup/restore availability depends 
 - Supabase SSR clients: https://supabase.com/docs/guides/auth/server-side/creating-a-client
 - Supabase PostgreSQL connection/pooler: https://supabase.com/docs/guides/database/connecting-to-postgres
 - Supabase password login and email recovery: https://supabase.com/docs/guides/auth/passwords
+
+## Inactivity timeout update — 19 October 2026
+
+After deploying the session-timeout update, sign in again once. Existing sessions do not yet have the required signed activity cookie. The 30-minute timeout and one-minute warning use the current server configuration; no extra SQL or Supabase paid session setting is needed. Test Stay signed in and leave a session inactive to check the expiry flow. See [Session timeout](SESSION-TIMEOUT.md).
