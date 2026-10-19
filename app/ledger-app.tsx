@@ -10,6 +10,7 @@ import { validateTripSettlement } from '../lib/record-rules';
 import DatePicker from './date-picker';
 import TripFields from './trip-fields';
 import EmiPlans from './emi-plans';
+import OwnershipTransfer from './ownership-transfer';
 import { tripsInView } from '../lib/trip-view';
 import { tripEntries, tripPaymentDate, cancelTripEntries } from '../lib/trip-entry';
 import { businessExpenses, expenseMonth, loanSchedule, tripStatusLabel } from '../lib/ledger';
@@ -305,6 +306,16 @@ export default function LedgerApp({ accountUser }: { accountUser: { email: strin
         catch (e: any) {
             setToast(e.message);
         } }}>{member.active ? 'Deactivate' : 'Activate'}</button>}</div>)}<div className="settings-note"><ShieldCheck size={16}/><p>Login uses email and password. Create the person’s account in Supabase Authentication, then add the same email here to grant partner permissions. Deactivating access here blocks their ledger access.</p></div></section>}
+    {owner && <OwnershipTransfer members={data.members} currentEmail={data.user.email} demo={demo} onTransfer={async transfer => {
+        if (demo) throw new Error('Ownership transfer is unavailable in the sample workspace.');
+        const response = await fetch('/api/ledger', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'transferOwnership', transfer }) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Unable to transfer ownership.');
+        setReal(previous => ({ ...previous, user: { ...previous.user, role: 'partner' }, members: [] }));
+        setModal(null); setForm({});
+        await load();
+        setToast('Ownership transferred. Your account is now a partner.');
+    }}/>}
     {!demo && <section className="panel settings-panel"><div className="panel-heading"><div><h2>Your login</h2><p>{accountUser.email}</p></div><ShieldCheck size={20}/></div><div className="account-actions"><a className="text-button" href="/account/password">Change password</a><form action={signOut}><button className="text-button" type="submit"><LogOut size={15}/>Sign out</button></form></div></section>}
     <section className="panel settings-panel"><div className="panel-heading"><div><h2>Use on your phone</h2><p>Add PIKU Holidays to your home screen.</p></div><Van size={20}/></div><details className="install-guide"><summary>How to add to home screen</summary><p><strong>iPhone:</strong> Open this website in Safari → Share → Add to Home Screen → Add.</p><p><strong>Android:</strong> Open this website in Chrome → menu ⋮ → Add to Home screen or Install app.</p><p>Sign in as usual. An internet connection is required to view and save records.</p></details></section><section className="panel settings-panel"><div className="panel-heading"><div><h2>Records & exports</h2><p>Take a copy of your records whenever you need it.</p></div><FileText size={20}/></div><button className="button secondary" onClick={() => exportFile(`piku-ledger-backup-${now}${demo ? '-sample' : ''}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), sample: demo, settings: data.settings, records: rs }, null, 2), 'application/json')}><Download size={16}/>Download full ledger backup</button>{owner && !demo && rs.length === 0 && <button className="button secondary import-button" onClick={() => open('import')}><Download size={16}/>Import existing ledger backup</button>}<h3 className="history-title">Recent changes</h3>{data.audit.length ? <div className="audit-list">{data.audit.slice(0, 6).map(a => <div key={a.id}><span className="audit-dot"/><span><strong>{a.action[0].toUpperCase() + a.action.slice(1)}</strong><small>{a.actor} · {new Date(a.at).toLocaleString('en-IN')}</small></span></div>)}</div> : <p className="muted small-copy">Changes will appear here as your team records transactions.</p>}</section></div>}
    <footer className="page-footer"><span>PIKU Holidays <span>·</span> A simpler way to run your business.</span><span>Amounts in INR <span>·</span> Dates follow India business time</span></footer>

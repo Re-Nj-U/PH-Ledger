@@ -1,5 +1,6 @@
 import { getDb } from '../../../db';
-import { getUser } from '../../../lib/auth';
+import { getUser, verifyOwnerPassword } from '../../../lib/auth';
+import { changeBusinessOwner } from '../../../lib/ownership';
 import type { LedgerDatabase, Statement } from '../../../lib/database';
 import { importLedger } from '../../../lib/import-ledger';
 import { resolveAccess } from '../../../lib/access';
@@ -73,6 +74,10 @@ export async function POST(request: Request) {
         validateWriteRequest(request);
         const c = await context();
         const body: any = await readLedgerBody(request);
+        if (body.action === 'transferOwnership') {
+            await changeBusinessOwner(c, body.transfer, verifyOwnerPassword);
+            return json({ ok: true });
+        }
         if (body.action === 'import') {
             if (!c.owner) throw new Error('403:Only the owner can import a ledger backup.');
             const count = await importLedger(c.db, body.backup, c.revision, c.user.email);

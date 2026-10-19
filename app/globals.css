@@ -898,3 +898,6 @@ h1{font-size:35px}
 .date-control.compact[data-mode=date] .date-calendar-top>.icon-button{display:inline-flex}
 
 @media(max-width:760px){.trip-primary-fields>.field:nth-last-child(-n+2){grid-column:1/-1}}
+
+.ownership-description{font-size:13px;color:var(--muted);line-height:1.8;margin:0 0 18px}.ownership-form{display:grid;gap:18px;max-width:560px}.ownership-form .field select{width:100%}.ownership-consequence{margin:0;align-items:flex-start}.ownership-consequence span{min-width:0;overflow-wrap:anywhere}.ownership-buttons{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}.ownership-panel .panel-heading p{overflow-wrap:anywhere}.ownership-form .checkbox-field{align-items:flex-start}.ownership-form .form-error{margin:0}
+@media(max-width:760px){.ownership-buttons{flex-direction:column-reverse}.ownership-buttons .button{width:100%}.ownership-form select{min-width:0}}

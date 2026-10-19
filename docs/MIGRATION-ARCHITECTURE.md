@@ -25,7 +25,7 @@ The frontend, application API and login pages run on Vercel. Supabase provides P
 - `app/page.tsx` redirects signed-out visitors to `/login`.
 - `app/login/` supports password sign-in and server-side sign-out.
 - `app/account/password/` supports changing a known password, requiring the current password and a 12-character new password.
-- `lib/access.ts` only permits the configured `OWNER_EMAIL` to initialize a fresh business. Thereafter owner rights depend on the saved Supabase user ID; changing the environment email does not transfer ownership.
+- `lib/access.ts` only permits the configured `OWNER_EMAIL` to initialize a fresh business. Thereafter owner rights depend on the saved Supabase user ID; changing the environment email does not transfer ownership. An explicit owner-only Settings transfer now changes the pinned Auth ID and member roles atomically after current-password verification; see [Owner transfer](OWNER-TRANSFER.md).
 - Active partner memberships are checked on every API request. A confirmed Supabase account by itself grants no ledger access. Owner roles in the member list cannot elevate a different Auth ID.
 - Owner-only setup/settings/member permissions remain enforced by the API, alongside existing daily transaction validation.
 - Public signup is disabled in Supabase. Accounts are initially created by the administrator in Supabase; app Settings separately grants or deactivates partner access. No external email is automatically sent by adding an app member.

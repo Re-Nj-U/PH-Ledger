@@ -40,6 +40,8 @@ The application supports a single business with a shared ledger. We can start wi
 
 Sections 2 to 6 describe the screens and daily workflows. Sections 7 to 9 explain calculations, monthly reports and worked examples. Sections 10 and 11 define business records and database storage. Sections 12 to 14 cover architecture, API behaviour and access controls. Sections 15 and 16 describe verification, operational limits and future changes.
 
+The current owner can transfer ownership from Settings → Business owner with current-password verification and explicit email confirmation. The new owner must be an active partner with a confirmed login that has signed in; the previous owner remains a partner. See [Owner transfer](OWNER-TRANSFER.md).
+
 The current app records a final agreed trip amount. Kilometres are calculated from the odometer readings, but the application does not calculate a quotation from a per-kilometre rate. Monthly review is supported; a month is not formally locked or closed.
 
 ## 2 Screens and navigation

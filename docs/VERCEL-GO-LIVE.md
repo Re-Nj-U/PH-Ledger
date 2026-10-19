@@ -26,7 +26,7 @@ Use a new project for this application, or a dedicated project you have already 
 6. Open **Authentication → Users → Add user → Create new user**. Create `pikuholidays@gmail.com` with a strong password and mark its email confirmed / auto confirmed. Enter passwords privately in Supabase; do not put them into this guide, source files or chat.
 7. Create the other partner's email/password account in the same way. They will also need ledger access granted by the owner in the application.
 
-There is no public registration page. A Supabase login account alone does not grant ledger access. Only the configured owner can initialize a fresh business, and other users need an active partner membership. Changing OWNER_EMAIL later does not transfer an existing business to another user.
+There is no public registration page. A Supabase login account alone does not grant ledger access. Only the configured owner can initialize a fresh business, and other users need an active partner membership. Changing OWNER_EMAIL later does not transfer an existing business to another user. Use the owner-only Settings → Business owner flow instead; see [Owner transfer](OWNER-TRANSFER.md).
 
 If you delete and recreate the owner Auth account, its Supabase user ID changes. Do not do this as a password-reset method; use the account password controls or an administrator recovery flow.
 
